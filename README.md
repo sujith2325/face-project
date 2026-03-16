@@ -1,2 +1,22 @@
-# face-project
-The Face Recognition System is a computer vision based project that identifies or verifies a person from an image or video using artificial intelligence and machine learning techniques. The system captures facial features, stores them in a database, and compares them with newly uploaded images to recognize the person.
+# Face Recognition System
+
+## Description
+This project is a face recognition system built using Python, Flask, OpenCV and DeepFace. It detects and identifies faces using stored database images.
+
+## Technologies Used
+- Python
+- Flask
+- OpenCV
+- DeepFace
+- NumPy
+
+## Features
+- Face detection
+- Face recognition
+- Database storage
+- Image upload
+- Web interface
+
+## How to run
+pip install -r requirements.txt
+python app.py
