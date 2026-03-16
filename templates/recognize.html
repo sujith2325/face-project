@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Recognition System - Recognize</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: radial-gradient(circle at 50% 120%, #4a00e0, #8e2de2, #0b0726, #000000);
+            background-attachment: fixed;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav {
+            padding: 18px 30px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .nav a:hover { background: rgba(255, 255, 255, 0.15); }
+        .active-tab {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            width: 420px;
+            margin-top: 70px;
+            text-align: left;
+        }
+        h2 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 25px;
+            font-weight: 700;
+            font-size: 22px;
+        }
+        .form-label {
+            font-size: 13px;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .drop-zone {
+            width: 100%;
+            padding: 30px 20px;
+            border: 2px dashed #bbb;
+            border-radius: 12px;
+            background: rgba(102, 126, 234, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .drop-zone .icon { font-size: 36px; margin-bottom: 8px; }
+        .drop-zone p { color: #888; font-size: 13px; }
+        .drop-zone input[type="file"] {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+        #preview-container { display: none; text-align: center; margin-bottom: 20px; }
+        #preview-container img {
+            max-width: 100%; max-height: 220px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+        #preview-container .file-name {
+            margin-top: 8px; font-size: 12px; color: #667eea; font-weight: 600;
+        }
+        button {
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5);
+        }
+        .error {
+            color: #c62828;
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid #ef9a9a;
+            text-align: center;
+        }
+        .db-hint {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #888;
+        }
+        .db-hint a { color: #667eea; text-decoration: none; font-weight: 600; }
+        .db-hint a:hover { text-decoration: underline; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="nav">
+    <a href="/">Register</a>
+    <a href="/recognize_page" class="active-tab">Recognize</a>
+    <a href="/database">View Database</a>
+</div>
+
+<div class="container">
+    <h2>🔍 Identify Faces</h2>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    <form action="/recognize" method="post" enctype="multipart/form-data">
+        <label class="form-label">Upload Image to Identify:</label>
+        <div class="drop-zone" id="dropZone">
+            <div class="icon">📷</div>
+            <p>Drag & drop or click to select an image</p>
+            <input type="file" name="image" id="fileInput" accept="image/*" required>
+        </div>
+        <div id="preview-container">
+            <img id="preview" src="" alt="Preview">
+            <div class="file-name" id="fileName"></div>
+        </div>
+        <button type="submit">🚀 Identify Faces</button>
+    </form>
+    <div class="db-hint">
+        Don't see the right results? <a href="/">Register more people</a>.
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('preview-container');
+    const dropZone = document.getElementById('dropZone');
+    const fileName = document.getElementById('fileName');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.style.display = 'block';
+                dropZone.style.display = 'none';
+                fileName.textContent = fileInput.files[0].name;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+</body>
+</html>

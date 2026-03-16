@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recognition Result</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: radial-gradient(circle at 50% 120%, #4a00e0, #8e2de2, #0b0726, #000000);
+            background-attachment: fixed;
+            text-align: center;
+            min-height: 100vh;
+            color: #fff;
+            padding-bottom: 60px;
+        }
+        .nav {
+            padding: 18px 30px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 50px;
+        }
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .nav a:hover { background: rgba(255, 255, 255, 0.15); }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .subtitle { font-size: 15px; color: rgba(255,255,255,0.65); margin-bottom: 40px; }
+
+        .result-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+        .image-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+        }
+        .image-card img {
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .image-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 10px;
+        }
+        .results-panel {
+            background: rgba(255, 255, 255, 0.95);
+            color: #222;
+            padding: 30px;
+            border-radius: 18px;
+            min-width: 280px;
+            max-width: 320px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            text-align: left;
+        }
+        .results-panel h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .person-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid;
+        }
+        .person-item.matched {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
+        }
+        .person-item.unknown {
+            background: #ffebee;
+            border-color: #ef9a9a;
+        }
+        .person-icon { font-size: 28px; }
+        .person-info .name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #222;
+        }
+        .person-info .distance {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+        .no-face-msg {
+            padding: 20px;
+            background: rgba(255,180,0,0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            border: 1px solid rgba(255,180,0,0.4);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
+        }
+        .count-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="nav">
+    <a href="/">Register</a>
+    <a href="/recognize_page">Recognize</a>
+    <a href="/database">View Database</a>
+</div>
+
+<h1>Recognition Result</h1>
+<p class="subtitle">
+    {% if no_face %}
+        No faces were detected in the uploaded image.
+    {% else %}
+        {{ identified_people|length }} face(s) detected and analyzed
+    {% endif %}
+</p>
+
+<div class="result-wrapper">
+    <div class="image-card">
+        <img src="{{ url_for('static', filename=output_image) }}" alt="Recognition Result">
+        <div class="image-label">Analyzed Image</div>
+    </div>
+
+    <div class="results-panel">
+        <h2>
+            Identified People
+            {% if not no_face %}
+            <span class="count-badge">{{ identified_people|length }}</span>
+            {% endif %}
+        </h2>
+
+        {% if no_face %}
+            <div class="no-face-msg">⚠️ No faces detected in the image. Please try with a clearer photo.</div>
+        {% elif identified_people|length == 0 %}
+            <div class="no-face-msg">No faces could be processed.</div>
+        {% else %}
+            {% for person in identified_people %}
+                <div class="person-item {{ 'matched' if person.matched else 'unknown' }}">
+                    <div class="person-icon">{{ '🟢' if person.matched else '🔴' }}</div>
+                    <div class="person-info">
+                        <div class="name">{{ person.name }}</div>
+                        {% if person.distance is not none %}
+                        <div class="distance">Similarity score: {{ "%.4f"|format(person.distance) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<a href="/recognize_page" class="btn-back">🔍 Recognize Another Image</a>
+
+</body>
+</html>
