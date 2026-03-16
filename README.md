@@ -1,22 +1,27 @@
 # Face Recognition System
 
-## Description
-This project is a face recognition system built using Python, Flask, OpenCV and DeepFace. It detects and identifies faces using stored database images.
+## Architecture Diagram
+![Architecture](arcitechture.png)
 
-## Technologies Used
-- Python
-- Flask
-- OpenCV
-- DeepFace
-- NumPy
+## Working Flow
+![workingflow](workingflow.png)
 
-## Features
-- Face detection
-- Face recognition
-- Database storage
-- Image upload
-- Web interface
+## Modules Description
 
-## How to run
-pip install -r requirements.txt
-python app.py
+### Image Upload Module
+Accepts user image input.
+
+### Face Detection Module
+Detects face using OpenCV.
+
+### Feature Extraction Module
+Extracts facial features.
+
+### Database Module
+Stores face encodings.
+
+### Matching Module
+Compares faces.
+
+### Result Module
+Displays result.
